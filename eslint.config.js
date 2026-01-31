@@ -11,14 +11,21 @@ export default defineConfig([
     files: ['**/*.{js,jsx}'],
     extends: [
       js.configs.recommended,
-      react.configs.recommended,
+      // react recommended is a shareable config object; use plugin directly via plugins in flat config
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
+    plugins: {
+      react,
+    },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      ecmaFeatures: { jsx: true },
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
       globals: globals.browser,
     },
     settings: {
@@ -26,7 +33,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['tailwind.config.js', 'vite.config.js', 'index.html'],
+    files: ['tailwind.config.js', 'vite.config.js'],
     languageOptions: {
       globals: globals.node,
     },

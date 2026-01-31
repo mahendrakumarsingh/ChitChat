@@ -74,7 +74,8 @@ export const useSocket = (userId, events) => {
     } catch {
       // Demo mode - no actual server
       console.log('Running in demo mode - no socket server');
-      setIsConnected(true);
+      // Avoid synchronous setState during render/effect body — defer to next tick
+      setTimeout(() => setIsConnected(true), 0);
     }
   }, [userId, events]);
 
