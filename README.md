@@ -34,8 +34,9 @@ export default defineConfig([
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
+        // TypeScript configuration removed when converting to JS
+        // project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        // tsconfigRootDir: import.meta.dirname,
       },
       // other options...
     },
@@ -63,8 +64,9 @@ export default defineConfig([
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
+        // TypeScript configuration removed when converting to JS
+        // project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        // tsconfigRootDir: import.meta.dirname,
       },
       // other options...
     },
