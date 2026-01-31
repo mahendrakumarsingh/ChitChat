@@ -76,7 +76,7 @@ export const useSocket = (userId, events) => {
       console.log('Running in demo mode - no socket server');
       setIsConnected(true);
     }
-  }, [userId]);
+  }, [userId, events]);
 
   const sendMessage = useCallback((conversationId, content, type = 'text') => {
     socketRef.current?.emit('message:send', {
@@ -104,7 +104,8 @@ export const useSocket = (userId, events) => {
   }, []);
 
   return {
-    socket: socketRef.current,
+    // return the ref object instead of current to avoid accessing refs during render
+    socket: socketRef,
     isConnected,
     sendMessage,
     startTyping,
