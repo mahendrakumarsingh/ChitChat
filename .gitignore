@@ -1,0 +1,19 @@
+# Root ignores
+node_modules
+/dist
+.DS_Store
+
+# Server
+/server/node_modules
+/server/.env
+/server/.env.local
+/server/logs
+/server/uploads/*
+!/server/uploads/.gitkeep
+
+# Client
+/client/node_modules
+/client/dist
+/client/.env
+/client/.env.local
+

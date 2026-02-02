@@ -1,75 +1,78 @@
-# React + TypeScript + Vite
+# Modern Real-time Chat Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A stunning, feature-rich real-time chat application built with the MERN stack (MongoDB, Express, React, Node.js) and Socket.io. This project features a modern Glassmorphism UI design, seamless media sharing, and robust messaging capabilities.
 
-Currently, two official plugins are available:
+![Chat App Screenshot](https://raw.githubusercontent.com/username/repo/main/screenshot.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+### Core Messaging
+- **Real-time Communication**: Instant messaging powered by Socket.io.
+- **Media Support**: Send and receive images, audio messages, and file attachments.
+- **Rich Interactions**: Emoji pickers, message reactions, and read receipts.
+- **Message Management**: "Delete for me" and "Delete for everyone" functionality.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### User Experience
+- **Typing Indicators**: Real-time visual feedback when users are typing.
+- **Online Status**: Live user availability tracking.
+- **Responsive Design**: Fully optimized for desktop and mobile devices.
+- **Glassmorphism UI**: A premium, modern interface with smooth animations and translucid elements.
+- **Sound Effects**: Audio feedback for sent and received messages.
 
-## Expanding the ESLint configuration
+### Security & Tech
+- **Authentication**: Secure JWT-based login and registration.
+- **Password Hashing**: Bcrypt encryption for user security.
+- **Robust Backend**: RESTful API structure with Express and Mongoose.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Frontend**: React.js, Tailwind CSS, Framer Motion / GSAP (Animations), Lucide React (Icons), Radix UI.
+- **Backend**: Node.js, Express.js, Socket.io.
+- **Database**: MongoDB.
+- **State Management**: React Hooks & Context API.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 📦 Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        // TypeScript configuration removed when converting to JS
-        // project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        // tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/yourusername/your-repo-name.git
+    cd your-repo-name
+    ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2.  **Install Dependencies**
+    ```bash
+    # Install server dependencies
+    cd server
+    npm install
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+    # Install client dependencies
+    cd ../client
+    npm install
+    ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        // TypeScript configuration removed when converting to JS
-        // project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        // tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+3.  **Environment Setup**
+    Create a `.env` file in the `server` directory:
+    ```env
+    PORT=4000
+    MONGODB_URI=your_mongodb_connection_string
+    JWT_SECRET=your_jwt_secret_key
+    ```
+
+4.  **Run the Application**
+    ```bash
+    # Start Backend
+    cd server
+    npm run dev
+
+    # Start Frontend (in a new terminal)
+    cd client
+    npm run dev
+    ```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
