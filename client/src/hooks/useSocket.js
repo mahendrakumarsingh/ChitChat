@@ -16,7 +16,10 @@ export const useSocket = (userId, events) => {
     if (!userId) return;
 
     try {
-      socketRef.current = io('http://localhost:4000', {
+      const socketUrl = import.meta.env.VITE_API_URL
+        ? import.meta.env.VITE_API_URL.replace('/api', '')
+        : 'http://localhost:4000';
+      socketRef.current = io(socketUrl, {
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: 5,

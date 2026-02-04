@@ -14,8 +14,14 @@ const server = http.createServer(app);
 // Initialize Socket.io
 const io = socketService.init(server);
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || '*',
+  credentials: true
+}));
 app.use(express.json());
+
+// Health check for Render
+app.get('/healthz', (req, res) => res.status(200).send('OK'));
 
 // Make io available in request
 app.use((req, res, next) => {
@@ -75,7 +81,7 @@ app.use('/api/messages', require('./routes/messages'));
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
-    console.log(`Server started on port ${PORT}`);
-    const fs = require('fs');
-    fs.appendFileSync('server_debug.txt', `Server started at ${new Date().toISOString()}\n`);
+  console.log(`Server started on port ${PORT}`);
+  const fs = require('fs');
+  fs.appendFileSync('server_debug.txt', `Server started at ${new Date().toISOString()}\n`);
 });

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 export const useChat = (currentUser) => { // Expecting currentUser object or null
   const [conversations, setConversations] = useState([]);
