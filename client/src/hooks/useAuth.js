@@ -20,10 +20,10 @@ export const useAuth = () => {
       if (!res.ok) throw new Error(data.error || 'Login failed');
 
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify({ username: data.username, name: data.name, email: data.email }));
+      localStorage.setItem('user', JSON.stringify({ id: data.id, username: data.username, name: data.name, email: data.email }));
       setAuthState({
         isAuthenticated: true,
-        user: { username: data.username, name: data.name, email: data.email },
+        user: { id: data.id, username: data.username, name: data.name, email: data.email },
         token: data.token,
       });
       return { success: true };
@@ -76,7 +76,7 @@ export const useAuth = () => {
       if (!res.ok) throw new Error(data.error || 'Update failed');
 
       // Update local storage and state
-      const newUser = { ...data.user, status: 'online' };
+      const newUser = { ...data.user, id: data.user.id || data.user._id || prev.user.id, status: 'online' };
       localStorage.setItem('user', JSON.stringify(newUser));
 
       setAuthState(prev => ({

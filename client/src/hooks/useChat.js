@@ -205,7 +205,42 @@ export const useChat = (currentUser) => { // Expecting currentUser object or nul
   }, [token, fetchConversations, selectConversation]);
 
   // Placeholder functions for compatibility with existing components
-  const receiveMessage = () => { };
+  const receiveMessage = useCallback((message) => {
+    console.log('[useChat] Processing received message:', message);
+    const conversationId = message.roomId;
+    if (!conversationId) return;
+
+    // Check if message already exists to avoid duplicates
+    setMessages(prev => {
+      const currentMessages = prev[conversationId] || [];
+      const isDuplicate = currentMessages.some(m => m._id === message._id || m.id === message._id || m.id === message.id);
+
+      console.log(`[useChat] Updating state for Room: ${conversationId}. Prev count: ${currentMessages.length}. Is Duplicate: ${isDuplicate}`);
+
+      if (isDuplicate) {
+        return prev;
+      }
+
+      const newState = {
+        ...prev,
+        [conversationId]: [...currentMessages, message]
+      };
+      console.log(`[useChat] New message added. New count: ${newState[conversationId].length}`);
+      return newState;
+    });
+
+    // Also update conversation last message if needed
+    setConversations(prev => prev.map(c => {
+      if (c.id === conversationId) {
+        return {
+          ...c,
+          lastMessage: message,
+          updatedAt: new Date()
+        };
+      }
+      return c;
+    }));
+  }, []);
   const addTypingIndicator = (data) => setTypingIndicators(prev => [...prev, data]);
   const removeTypingIndicator = () => setTypingIndicators([]);
   const markMessageAsRead = () => { };

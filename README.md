@@ -35,8 +35,8 @@ A stunning, feature-rich real-time chat application built with the MERN stack (M
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/yourusername/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/mahendrakumarsingh/ChitChat.git
+    cd ChitChat
     ```
 
 2.  **Install Dependencies**

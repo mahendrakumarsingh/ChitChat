@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
+
 import { ChatHeader } from './ChatHeader';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
@@ -24,23 +24,16 @@ export const ChatWindow = ({
   const [hasScrolled, setHasScrolled] = useState(false);
 
   // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on update
   useEffect(() => {
-    if (messagesEndRef.current && !hasScrolled) {
+    if (messagesEndRef.current) {
+      // If we just loaded messages or received a new one, scroll to bottom
+      // We checking if we are ALREADY at the bottom or if it's a new load
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, hasScrolled]);
+  }, [messages.length]); // Scroll when message count changes
 
-  // Entrance animation for messages container
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      const children = messagesContainerRef.current.children;
-      gsap.fromTo(
-        children,
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'back.out(1.7)', delay: 0.2 }
-      );
-    }
-  }, [conversation?.id]);
+
 
   const handleScroll = () => {
     if (messagesContainerRef.current) {
@@ -80,7 +73,12 @@ export const ChatWindow = ({
 
   // Group messages by date
   const groupedMessages = messages.reduce((groups, message) => {
-    const date = new Date(message.timestamp || message.createdAt).toDateString();
+    let dateObj = new Date(message.timestamp || message.createdAt);
+    if (isNaN(dateObj.getTime())) {
+      // Fallback for invalid date
+      dateObj = new Date();
+    }
+    const date = dateObj.toDateString();
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -118,6 +116,14 @@ export const ChatWindow = ({
     );
   }
 
+  console.log('Grouped keys:', Object.keys(groupedMessages));
+  const lastDate = Object.keys(groupedMessages).pop();
+  if (lastDate) {
+    console.log('Last group messages count:', groupedMessages[lastDate].length);
+    const lastMsg = groupedMessages[lastDate][groupedMessages[lastDate].length - 1];
+    console.log('Last message content:', lastMsg?.content, 'Timestamp:', lastMsg?.timestamp || lastMsg?.createdAt);
+  }
+
   return (
     <div className="flex-1 flex flex-col h-full bg-[var(--void)]">
       <ChatHeader
@@ -139,7 +145,7 @@ export const ChatWindow = ({
             {/* Date Divider */}
             <div className="flex items-center justify-center">
               <div className="px-4 py-1 rounded-full bg-[var(--surface)] text-xs text-[var(--text-muted)]">
-                {formatDate(dateMessages[0].timestamp || dateMessages[0].createdAt)}
+                {formatDate(dateMessages[0]?.timestamp || dateMessages[0]?.createdAt)}
               </div>
             </div>
 

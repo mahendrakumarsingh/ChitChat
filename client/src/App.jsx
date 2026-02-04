@@ -11,7 +11,11 @@ import './App.css';
 
 function App() {
   const { isAuthenticated, user, login, register, logout, updateProfile } = useAuth();
+  console.log('[App] Render. Auth:', isAuthenticated, 'User:', user?.id);
   const [isConnected, setIsConnected] = useState(true);
+
+
+
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
 
@@ -48,9 +52,7 @@ function App() {
   // Socket connection (mock for demo)
   const { isConnected: socketConnected } = useSocket(user?.id || null, {
     onMessage: (message) => {
-      if (activeConversation) {
-        receiveMessage(message, activeConversation);
-      }
+      receiveMessage(message);
     },
     onTyping: (data) => {
       console.log('Typing:', data);

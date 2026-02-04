@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
+// Removed GSAP animation for debugging visibility
 import { Check, CheckCheck, FileText, Download, Play, Pause, MoreVertical, Trash2, Globe } from 'lucide-react';
 import {
   DropdownMenu,
@@ -23,24 +23,7 @@ export const MessageBubble = ({
   const audioRef = useRef(null);
   const bubbleRef = useRef(null);
 
-  useEffect(() => {
-    // Entrance animation
-    gsap.fromTo(
-      bubbleRef.current,
-      {
-        scale: 0.8,
-        opacity: 0,
-        x: isSelf ? 50 : -50,
-      },
-      {
-        scale: 1,
-        opacity: 1,
-        x: 0,
-        duration: 0.4,
-        ease: 'back.out(1.7)',
-      }
-    );
-  }, [isSelf]);
+
 
   const formatTime = (date) => {
     return new Date(date).toLocaleTimeString('en-US', {
@@ -204,7 +187,7 @@ export const MessageBubble = ({
               </span>
               {isSelf && (
                 <span className="text-[var(--electric-blue)]">
-                  {message.readBy.length > 0 ? (
+                  {message.readBy?.length > 0 ? (
                     <CheckCheck className="w-3.5 h-3.5" />
                   ) : (
                     <Check className="w-3.5 h-3.5" />

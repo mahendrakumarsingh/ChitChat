@@ -3,11 +3,33 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
+const http = require('http');
+const socketService = require('./socket');
+
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const io = socketService.init(server);
+
 app.use(cors());
 app.use(express.json());
+
+// Make io available in request
+app.use((req, res, next) => {
+  if (req.path.includes('socket.io')) {
+    console.log(`[Socket.io HTTP] ${req.method} ${req.url}`);
+  }
+  next();
+});
+
+app.use((req, res, next) => {
+  req.io = io;
+  req.socketService = socketService;
+  next();
+});
 
 const mongoUri = process.env.MONGODB_URI;
 if (!mongoUri) {
@@ -52,4 +74,8 @@ app.use('/api/conversations', require('./routes/conversations'));
 app.use('/api/messages', require('./routes/messages'));
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+    const fs = require('fs');
+    fs.appendFileSync('server_debug.txt', `Server started at ${new Date().toISOString()}\n`);
+});

@@ -10,6 +10,7 @@ const MessageSchema = new mongoose.Schema({
   fileSize: Number,
   roomId: { type: String, default: 'global' },
   deletedFor: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   isDeleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });

@@ -5,12 +5,18 @@ export const useSocket = (userId, events) => {
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(true);
 
+  // Keep latest events in a ref to avoid re-connecting when they change
+  const eventsRef = useRef(events);
   useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
+
+  useEffect(() => {
+    console.log('[useSocket] Effect triggered. UserId:', userId);
     if (!userId) return;
 
     try {
       socketRef.current = io('http://localhost:4000', {
-        transports: ['websocket'],
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: 5,
@@ -30,54 +36,52 @@ export const useSocket = (userId, events) => {
         setIsConnected(false);
       });
 
-      socket.on('connect_error', () => {
-        console.log('Socket connection failed - running in demo mode');
-        setIsConnected(true); // Demo mode - pretend connected
+      socket.on('connect_error', (err) => {
+        console.log('Socket connection failed:', err);
+        // Do not fake connection on error
       });
 
       // Message events
       socket.on('message:new', (message) => {
-        events.onMessage?.(message);
+        console.log('[Client Socket] Received message:', message);
+        eventsRef.current.onMessage?.(message);
       });
 
       // Typing events
       socket.on('typing:start', (data) => {
-        events.onTyping?.(data);
+        eventsRef.current.onTyping?.(data);
       });
 
       socket.on('typing:stop', (data) => {
-        events.onStopTyping?.(data);
+        eventsRef.current.onStopTyping?.(data);
       });
 
       // User presence events
       socket.on('user:online', (data) => {
-        events.onUserOnline?.(data.userId);
+        eventsRef.current.onUserOnline?.(data.userId);
       });
 
       socket.on('user:offline', (data) => {
-        events.onUserOffline?.(data.userId);
+        eventsRef.current.onUserOffline?.(data.userId);
       });
 
       // Message read receipts
       socket.on('message:read', (data) => {
-        events.onMessageRead?.(data);
+        eventsRef.current.onMessageRead?.(data);
       });
 
       // Reactions
       socket.on('message:reaction', (data) => {
-        events.onReaction?.(data);
+        eventsRef.current.onReaction?.(data);
       });
 
       return () => {
         socket.disconnect();
       };
     } catch {
-      // Demo mode - no actual server
-      console.log('Running in demo mode - no socket server');
-      // Avoid synchronous setState during render/effect body — defer to next tick
-      setTimeout(() => setIsConnected(true), 0);
+      console.log('Socket initialization error');
     }
-  }, [userId, events]);
+  }, [userId]); // Only re-connect if userId changes
 
   const sendMessage = useCallback((conversationId, content, type = 'text') => {
     socketRef.current?.emit('message:send', {
@@ -105,7 +109,6 @@ export const useSocket = (userId, events) => {
   }, []);
 
   return {
-    // return the ref object instead of current to avoid accessing refs during render
     socket: socketRef,
     isConnected,
     sendMessage,

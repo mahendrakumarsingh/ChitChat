@@ -59,6 +59,31 @@ router.delete('/:messageId', auth, async (req, res) => {
     }
 
     await msg.save();
+
+    // Notify about deletion
+    if (req.io && req.socketService) {
+      if (mode === 'everyone') {
+        const conversation = await Conversation.findById(msg.roomId);
+        if (conversation) {
+          conversation.members.forEach(memberId => {
+            // Emit to all members
+            req.socketService.emitToUser(memberId.toString(), 'message:delete', {
+              messageId,
+              conversationId: msg.roomId
+            });
+          });
+        }
+      } else {
+        // Emit only to requestor if just deleted for me
+        // (Though frontend often handles this optimistically, good to confirm)
+        req.socketService.emitToUser(req.user.id, 'message:delete', {
+          messageId,
+          conversationId: msg.roomId,
+          mode: 'me'
+        });
+      }
+    }
+
     res.json({ success: true, messageId, mode, isDeleted: msg.isDeleted });
   } catch (err) {
     console.error(err);
@@ -142,6 +167,16 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
     await conversation.save();
 
     res.status(201).json(msg);
+
+    // Emit real-time message
+    if (req.io && req.socketService) {
+      conversation.members.forEach(memberId => {
+        // Don't need to emit to sender if they handle it optimistically, 
+        // but often it's good for confirmation or just emit to everyone.
+        // The helper emits to specific users.
+        req.socketService.emitToUser(memberId.toString(), 'message:new', msg);
+      });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
