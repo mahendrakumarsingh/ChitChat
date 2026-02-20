@@ -92,7 +92,7 @@ const init = (server) => {
         });
 
         socket.on('webrtc:answer', ({ answer, callerId, receiverId }) => {
-            emitToUser(callerId, 'webrtc:answer', { answer, receiverId });
+            emitToUser(receiverId, 'webrtc:answer', { answer, callerId });
         });
 
         socket.on('webrtc:ice-candidate', ({ candidate, receiverId, senderId }) => {

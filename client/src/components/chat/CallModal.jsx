@@ -23,6 +23,25 @@ export const CallModal = ({
     const toggleFullscreen = () => setIsFullscreen(!isFullscreen);
 
     useEffect(() => {
+        let ringtone = null;
+        if (callState === 'incoming' || callState === 'calling') {
+            ringtone = new Audio('https://actions.google.com/sounds/v1/alarms/phone_ringing.ogg');
+            ringtone.loop = true;
+            const playPromise = ringtone.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => console.log('Ringtone blocked usually because of browser auto-play policy:', err));
+            }
+        }
+
+        return () => {
+            if (ringtone) {
+                ringtone.pause();
+                ringtone.currentTime = 0;
+            }
+        };
+    }, [callState]);
+
+    useEffect(() => {
         if (localVideoRef.current && localStream) {
             localVideoRef.current.srcObject = localStream;
         }
