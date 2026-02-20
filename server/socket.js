@@ -57,6 +57,41 @@ const init = (server) => {
             });
         });
 
+        // WebRTC & Call events
+        socket.on('call:initiate', ({ callerId, receiverId, callerName, isVideo }) => {
+            console.log(`Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}`);
+            emitToUser(receiverId, 'call:incoming', {
+                callerId,
+                callerName,
+                receiverId,
+                isVideo
+            });
+        });
+
+        socket.on('call:accept', ({ callerId, receiverId }) => {
+            emitToUser(callerId, 'call:accepted', { receiverId });
+        });
+
+        socket.on('call:reject', ({ callerId, receiverId }) => {
+            emitToUser(callerId, 'call:rejected', { receiverId });
+        });
+
+        socket.on('call:end', ({ otherUserId }) => {
+            emitToUser(otherUserId, 'call:ended', { userId: socket.userId });
+        });
+
+        socket.on('webrtc:offer', ({ offer, receiverId, callerId }) => {
+            emitToUser(receiverId, 'webrtc:offer', { offer, callerId });
+        });
+
+        socket.on('webrtc:answer', ({ answer, callerId, receiverId }) => {
+            emitToUser(callerId, 'webrtc:answer', { answer, receiverId });
+        });
+
+        socket.on('webrtc:ice-candidate', ({ candidate, receiverId, senderId }) => {
+            emitToUser(receiverId, 'webrtc:ice-candidate', { candidate, senderId });
+        });
+
         socket.on('disconnect', () => {
             console.log('Socket disconnected:', socket.id);
 

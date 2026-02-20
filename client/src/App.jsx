@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatWindow } from '@/components/chat/ChatWindow';
@@ -7,6 +7,8 @@ import { ConnectionStatus } from '@/components/common/ConnectionStatus';
 import { useAuth } from '@/hooks/useAuth';
 import { useChat } from '@/hooks/useChat';
 import { useSocket } from '@/hooks/useSocket';
+import { useWebRTC } from '@/hooks/useWebRTC';
+import { CallModal } from '@/components/chat/CallModal';
 import './App.css';
 
 function App() {
@@ -14,9 +16,7 @@ function App() {
   console.log('[App] Render. Auth:', isAuthenticated, 'User:', user?.id);
   const [isConnected, setIsConnected] = useState(true);
 
-
-
-  const [isMobile, setIsMobile] = useState(false);
+  const webRTCHandlersRef = useRef({}); const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
 
   const {
@@ -50,7 +50,7 @@ function App() {
   }, [activeConversation]);
 
   // Socket connection (mock for demo)
-  const { isConnected: socketConnected } = useSocket(user?.id || null, {
+  const { socket: socketRef, isConnected: socketConnected } = useSocket(user?.id || null, {
     onMessage: (message) => {
       receiveMessage(message);
     },
@@ -66,7 +66,20 @@ function App() {
     onUserOffline: (userId) => {
       console.log('User offline:', userId);
     },
+    onCallIncoming: (data) => webRTCHandlersRef.current.onCallIncoming?.(data),
+    onCallAccepted: (data) => webRTCHandlersRef.current.onCallAccepted?.(data),
+    onCallRejected: (data) => webRTCHandlersRef.current.onCallRejected?.(data),
+    onCallEnded: (data) => webRTCHandlersRef.current.onCallEnded?.(data),
+    onWebRTCOffer: (data) => webRTCHandlersRef.current.onWebRTCOffer?.(data),
+    onWebRTCAnswer: (data) => webRTCHandlersRef.current.onWebRTCAnswer?.(data),
+    onWebRTCIceCandidate: (data) => webRTCHandlersRef.current.onWebRTCIceCandidate?.(data),
   });
+
+  const webRTC = useWebRTC(socketRef, user?.id, user?.name);
+
+  useEffect(() => {
+    webRTCHandlersRef.current = webRTC.socketHandlers;
+  }, [webRTC.socketHandlers]);
 
   useEffect(() => {
     setIsConnected(socketConnected);
@@ -148,6 +161,22 @@ function App() {
     selectConversation('');
   };
 
+  const handleAudioCall = () => {
+    if (!activeConvData) return;
+    const otherUserId = activeConvData.otherMemberId || activeConvData.participants.find(p => p._id !== user?.id)?._id;
+    if (otherUserId) {
+      webRTC.initMediaAndCall(otherUserId, false);
+    }
+  };
+
+  const handleVideoCall = () => {
+    if (!activeConvData) return;
+    const otherUserId = activeConvData.otherMemberId || activeConvData.participants.find(p => p._id !== user?.id)?._id;
+    if (otherUserId) {
+      webRTC.initMediaAndCall(otherUserId, true);
+    }
+  };
+
   // Get active conversation data
   const activeConvData = activeConversation
     ? conversations.find(c => c.id === activeConversation) || null
@@ -198,12 +227,28 @@ function App() {
               onDelete={handleDeleteMessage}
               onBack={isMobile ? handleBackToSidebar : undefined}
               isMobile={isMobile}
+              onAudioCall={handleAudioCall}
+              onVideoCall={handleVideoCall}
             />
           ) : (
             <EmptyState />
           )}
         </>
       )}
+
+      {/* Call Modal */}
+      <CallModal
+        callState={webRTC.callState}
+        caller={webRTC.caller}
+        receiverItem={webRTC.receiverItem}
+        isVideoCall={webRTC.isVideoCall}
+        localStream={webRTC.localStream}
+        remoteStream={webRTC.remoteStream}
+        onAccept={webRTC.answerCall}
+        onReject={webRTC.rejectCall}
+        onEnd={webRTC.endCall}
+        onFlipCamera={webRTC.flipCamera}
+      />
     </div>
   );
 }

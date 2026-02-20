@@ -18,6 +18,8 @@ export const ChatWindow = ({
   onDelete,
   onBack,
   isMobile,
+  onAudioCall,
+  onVideoCall,
 }) => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -132,6 +134,8 @@ export const ChatWindow = ({
         typingUsers={getTypingUsers()}
         onBack={onBack}
         isMobile={isMobile}
+        onAudioCall={onAudioCall}
+        onVideoCall={onVideoCall}
       />
 
       {/* Messages */}

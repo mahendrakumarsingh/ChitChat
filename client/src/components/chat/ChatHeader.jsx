@@ -7,6 +7,8 @@ export const ChatHeader = ({
   typingUsers,
   onBack,
   isMobile,
+  onAudioCall,
+  onVideoCall,
 }) => {
   if (!conversation) return null;
 
@@ -64,10 +66,10 @@ export const ChatHeader = ({
       </div>
 
       <div className="flex items-center gap-1">
-        <button className="p-2.5 rounded-xl hover:bg-[var(--surface-light)] transition-colors duration-200 group">
+        <button onClick={onAudioCall} className="p-2.5 rounded-xl hover:bg-[var(--surface-light)] transition-colors duration-200 group">
           <Phone className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--electric-blue)] transition-colors" />
         </button>
-        <button className="p-2.5 rounded-xl hover:bg-[var(--surface-light)] transition-colors duration-200 group">
+        <button onClick={onVideoCall} className="p-2.5 rounded-xl hover:bg-[var(--surface-light)] transition-colors duration-200 group">
           <Video className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--electric-blue)] transition-colors" />
         </button>
         <button className="p-2.5 rounded-xl hover:bg-[var(--surface-light)] transition-colors duration-200 group">

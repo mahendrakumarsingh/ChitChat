@@ -78,6 +78,29 @@ export const useSocket = (userId, events) => {
         eventsRef.current.onReaction?.(data);
       });
 
+      // WebRTC & Call Events
+      socket.on('call:incoming', (data) => {
+        eventsRef.current.onCallIncoming?.(data);
+      });
+      socket.on('call:accepted', (data) => {
+        eventsRef.current.onCallAccepted?.(data);
+      });
+      socket.on('call:rejected', (data) => {
+        eventsRef.current.onCallRejected?.(data);
+      });
+      socket.on('call:ended', (data) => {
+        eventsRef.current.onCallEnded?.(data);
+      });
+      socket.on('webrtc:offer', (data) => {
+        eventsRef.current.onWebRTCOffer?.(data);
+      });
+      socket.on('webrtc:answer', (data) => {
+        eventsRef.current.onWebRTCAnswer?.(data);
+      });
+      socket.on('webrtc:ice-candidate', (data) => {
+        eventsRef.current.onWebRTCIceCandidate?.(data);
+      });
+
       return () => {
         socket.disconnect();
       };
