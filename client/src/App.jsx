@@ -210,50 +210,46 @@ function App() {
   }
 
   return (
-    <div className="h-screen w-full flex bg-[var(--void)] overflow-hidden min-h-0 min-w-0">
+    <div className="fixed inset-0 flex bg-[var(--void)] overflow-hidden text-[var(--text-primary)]">
       <ConnectionStatus isConnected={isConnected} />
 
       {/* Sidebar */}
-      {(!isMobile || showSidebar) && (
-        <Sidebar
-          conversations={conversations}
-          activeConversation={activeConversation}
-          currentUser={user}
-          onlineUsers={onlineUsers}
-          onSelectConversation={handleSelectConversation}
-          onLogout={logout}
-          contacts={contacts}
-          onAddContact={addContact}
-          onCreateConversation={createConversation}
-          onUpdateProfile={updateProfile}
-        />
-      )}
+      <Sidebar
+        conversations={conversations}
+        activeConversation={activeConversation}
+        currentUser={user}
+        onlineUsers={onlineUsers}
+        onSelectConversation={handleSelectConversation}
+        onLogout={logout}
+        contacts={contacts}
+        onAddContact={addContact}
+        onCreateConversation={createConversation}
+        onUpdateProfile={updateProfile}
+      />
 
-      {/* Chat Window */}
-      {(!isMobile || !showSidebar) && (
-        <>
-          {activeConvData ? (
-            <ChatWindow
-              conversation={activeConvData}
-              messages={activeMessages}
-              currentUser={user}
-              onlineUsers={onlineUsers}
-              typingIndicators={typingIndicators}
-              onSendMessage={handleSendMessage}
-              onTypingStart={() => { }}
-              onTypingStop={() => { }}
-              onReaction={handleAddReaction}
-              onDelete={handleDeleteMessage}
-              onBack={isMobile ? handleBackToSidebar : undefined}
-              isMobile={isMobile}
-              onAudioCall={handleAudioCall}
-              onVideoCall={handleVideoCall}
-            />
-          ) : (
-            <EmptyState />
-          )}
-        </>
-      )}
+      {/* Chat Window Container */}
+      <div className={`flex-1 min-w-0 h-full flex-col bg-[var(--void)] ${activeConversation ? 'flex' : 'hidden md:flex'}`}>
+        {activeConvData ? (
+          <ChatWindow
+            conversation={activeConvData}
+            messages={activeMessages}
+            currentUser={user}
+            onlineUsers={onlineUsers}
+            typingIndicators={typingIndicators}
+            onSendMessage={handleSendMessage}
+            onTypingStart={() => { }}
+            onTypingStop={() => { }}
+            onReaction={handleAddReaction}
+            onDelete={handleDeleteMessage}
+            onBack={isMobile ? handleBackToSidebar : undefined}
+            isMobile={isMobile}
+            onAudioCall={handleAudioCall}
+            onVideoCall={handleVideoCall}
+          />
+        ) : (
+          <EmptyState />
+        )}
+      </div>
 
       {/* Call Modal */}
       <CallModal

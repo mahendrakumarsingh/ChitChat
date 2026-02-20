@@ -100,7 +100,7 @@ export const Sidebar = ({
   return (
     <div
       ref={sidebarRef}
-      className="w-80 h-full glass-strong flex flex-col border-r border-[var(--surface-light)]"
+      className={`w-full md:w-80 h-full glass-strong flex-col border-r border-[var(--surface-light)] flex-shrink-0 ${activeConversation ? 'hidden md:flex' : 'flex'}`}
     >
       {/* Header */}
       <div className="p-4 border-b border-[var(--surface-light)]">
