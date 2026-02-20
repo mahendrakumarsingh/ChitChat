@@ -19,7 +19,7 @@ export const ChatHeader = ({
   const isTyping = typingUsers.length > 0;
 
   return (
-    <div className="h-16 px-4 flex items-center justify-between glass-strong border-b border-[var(--surface-light)]">
+    <div className="h-16 shrink-0 z-20 px-4 flex items-center justify-between glass-strong border-b border-[var(--surface-light)]">
       <div className="flex items-center gap-3">
         {isMobile && (
           <button

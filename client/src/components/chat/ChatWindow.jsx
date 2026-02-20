@@ -127,7 +127,7 @@ export const ChatWindow = ({
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[var(--void)]">
+    <div className="flex-1 flex flex-col items-stretch min-h-0 min-w-0 h-full bg-[var(--void)]">
       <ChatHeader
         conversation={conversation}
         onlineUsers={onlineUsers}
@@ -142,7 +142,7 @@ export const ChatWindow = ({
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar"
+        className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 space-y-6 custom-scrollbar"
       >
         {Object.entries(groupedMessages).map(([date, dateMessages]) => (
           <div key={date} className="space-y-4">

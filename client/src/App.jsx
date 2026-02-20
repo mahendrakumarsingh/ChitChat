@@ -210,7 +210,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen w-full flex bg-[var(--void)] overflow-hidden">
+    <div className="h-screen w-full flex bg-[var(--void)] overflow-hidden min-h-0 min-w-0">
       <ConnectionStatus isConnected={isConnected} />
 
       {/* Sidebar */}

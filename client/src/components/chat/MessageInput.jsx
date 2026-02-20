@@ -139,7 +139,7 @@ export const MessageInput = ({
   return (
     <div
       ref={containerRef}
-      className="p-4 glass-strong border-t border-[var(--surface-light)] relative"
+      className="p-4 shrink-0 z-20 glass-strong border-t border-[var(--surface-light)] relative"
     >
       {/* Hidden inputs */}
       <input
@@ -188,8 +188,8 @@ export const MessageInput = ({
           <button
             onClick={isRecording ? stopRecording : startRecording}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-colors text-sm ${isRecording
-                ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30'
-                : 'bg-[var(--surface)] hover:bg-[var(--surface-light)] text-[var(--text-muted)]'
+              ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30'
+              : 'bg-[var(--surface)] hover:bg-[var(--surface-light)] text-[var(--text-muted)]'
               }`}
           >
             {isRecording ? <StopCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
