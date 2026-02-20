@@ -28,6 +28,8 @@ const init = (server) => {
                 userSockets.set(userId, new Set());
             }
             userSockets.get(userId).add(socket.id);
+            const fs = require('fs');
+            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Registered ${userId} to socket ${socket.id}. Total: ${userSockets.get(userId).size}\n`);
             console.log(`[Socket] Registered ${userId} to socket ${socket.id}. Total sockets for user: ${userSockets.get(userId).size}`);
 
             // Store userId on socket for disconnect handling
@@ -59,6 +61,9 @@ const init = (server) => {
 
         // WebRTC & Call events
         socket.on('call:initiate', ({ callerId, receiverId, callerName, isVideo }) => {
+            const fs = require('fs');
+            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}\n`);
+
             console.log(`Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}`);
             emitToUser(receiverId, 'call:incoming', {
                 callerId,
@@ -69,6 +74,8 @@ const init = (server) => {
         });
 
         socket.on('call:accept', ({ callerId, receiverId }) => {
+            const fs = require('fs');
+            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Call accepted by ${receiverId} for ${callerId}\n`);
             emitToUser(callerId, 'call:accepted', { receiverId });
         });
 
@@ -124,6 +131,9 @@ const getUserSockets = (userId) => {
 
 const emitToUser = (userId, event, data) => {
     const sockets = getUserSockets(userId);
+    const fs = require('fs');
+    fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Emitting ${event} to user ${userId} (Sockets: ${sockets.size})\n`);
+
     console.log(`[Socket] Emitting ${event} to user ${userId} (Sockets: ${sockets.size})`);
     sockets.forEach(socketId => {
         io.to(socketId).emit(event, data);

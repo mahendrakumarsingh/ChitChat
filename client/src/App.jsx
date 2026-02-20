@@ -13,7 +13,8 @@ import './App.css';
 
 function App() {
   const { isAuthenticated, user, login, register, logout, updateProfile } = useAuth();
-  console.log('[App] Render. Auth:', isAuthenticated, 'User:', user?.id);
+  const currentUserId = user?.id || user?._id || null;
+  console.log('[App] Render. Auth:', isAuthenticated, 'User:', currentUserId);
   const [isConnected, setIsConnected] = useState(true);
 
   const webRTCHandlersRef = useRef({}); const [isMobile, setIsMobile] = useState(false);
@@ -33,7 +34,7 @@ function App() {
     addContact,
     createConversation,
     deleteMessage,
-  } = useChat(user?.id || null);
+  } = useChat(currentUserId);
 
   // Check mobile viewport
   useEffect(() => {
@@ -50,7 +51,7 @@ function App() {
   }, [activeConversation]);
 
   // Socket connection (mock for demo)
-  const { socket: socketRef, isConnected: socketConnected } = useSocket(user?.id || null, {
+  const { socket: socketRef, isConnected: socketConnected } = useSocket(currentUserId, {
     onMessage: (message) => {
       receiveMessage(message);
     },
@@ -75,7 +76,7 @@ function App() {
     onWebRTCIceCandidate: (data) => webRTCHandlersRef.current.onWebRTCIceCandidate?.(data),
   });
 
-  const webRTC = useWebRTC(socketRef, user?.id, user?.name);
+  const webRTC = useWebRTC(socketRef, currentUserId, user?.name || user?.username);
 
   useEffect(() => {
     webRTCHandlersRef.current = webRTC.socketHandlers;
@@ -163,17 +164,35 @@ function App() {
 
   const handleAudioCall = () => {
     if (!activeConvData) return;
-    const otherUserId = activeConvData.otherMemberId || activeConvData.participants.find(p => p._id !== user?.id)?._id;
+
+    let otherUserId = activeConvData.otherMemberId;
+    if (!otherUserId) {
+      const p = activeConvData.participants?.find(p => (p._id || p.id) !== currentUserId);
+      otherUserId = p?._id || p?.id;
+    }
+
+    console.log('[App] Init Audio Call to:', otherUserId);
     if (otherUserId) {
       webRTC.initMediaAndCall(otherUserId, false);
+    } else {
+      alert('Cannot determine the user to call.');
     }
   };
 
   const handleVideoCall = () => {
     if (!activeConvData) return;
-    const otherUserId = activeConvData.otherMemberId || activeConvData.participants.find(p => p._id !== user?.id)?._id;
+
+    let otherUserId = activeConvData.otherMemberId;
+    if (!otherUserId) {
+      const p = activeConvData.participants?.find(p => (p._id || p.id) !== currentUserId);
+      otherUserId = p?._id || p?.id;
+    }
+
+    console.log('[App] Init Video Call to:', otherUserId);
     if (otherUserId) {
       webRTC.initMediaAndCall(otherUserId, true);
+    } else {
+      alert('Cannot determine the user to call.');
     }
   };
 
