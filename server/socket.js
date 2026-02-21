@@ -20,25 +20,24 @@ const init = (server) => {
 
         socket.on('user:online', ({ userId }) => {
             if (!userId) return;
+            const strId = String(userId);
 
-            console.log(`User online: ${userId} (socket: ${socket.id})`);
+            console.log(`User online: ${strId} (socket: ${socket.id})`);
 
             // Add socket to user's set
-            if (!userSockets.has(userId)) {
-                userSockets.set(userId, new Set());
+            if (!userSockets.has(strId)) {
+                userSockets.set(strId, new Set());
             }
-            userSockets.get(userId).add(socket.id);
+            userSockets.get(strId).add(socket.id);
             const fs = require('fs');
-            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Registered ${userId} to socket ${socket.id}. Total: ${userSockets.get(userId).size}\n`);
-            console.log(`[Socket] Registered ${userId} to socket ${socket.id}. Total sockets for user: ${userSockets.get(userId).size}`);
+            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Registered ${strId} to socket ${socket.id}. Total: ${userSockets.get(strId).size}\n`);
+            console.log(`[Socket] Registered ${strId} to socket ${socket.id}. Total sockets for user: ${userSockets.get(strId).size}`);
 
             // Store userId on socket for disconnect handling
-
-            // Store userId on socket for disconnect handling
-            socket.userId = userId;
+            socket.userId = strId;
 
             // Broadcast user online status
-            socket.broadcast.emit('user:online', { userId });
+            socket.broadcast.emit('user:online', { userId: strId });
         });
 
         // Typing events
@@ -65,6 +64,14 @@ const init = (server) => {
             fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}\n`);
 
             console.log(`Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}`);
+
+            const receiverSockets = getUserSockets(receiverId);
+            if (receiverSockets.size === 0) {
+                // Emitting an automatic rejection if the user is literally offline
+                emitToUser(callerId, 'call:rejected', { receiverId, reason: 'offline' });
+                return;
+            }
+
             emitToUser(receiverId, 'call:incoming', {
                 callerId,
                 callerName,
@@ -126,13 +133,14 @@ const getIO = () => {
 };
 
 const getUserSockets = (userId) => {
-    return userSockets.get(userId) || new Set();
+    return userSockets.get(String(userId)) || new Set();
 };
 
 const emitToUser = (userId, event, data) => {
     const sockets = getUserSockets(userId);
     const fs = require('fs');
-    fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Emitting ${event} to user ${userId} (Sockets: ${sockets.size})\n`);
+    const availableUsers = Array.from(userSockets.keys()).join(', ');
+    fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Emitting ${event} to user ${userId} (Sockets: ${sockets.size}). Available user keys: [${availableUsers}]\n`);
 
     console.log(`[Socket] Emitting ${event} to user ${userId} (Sockets: ${sockets.size})`);
     sockets.forEach(socketId => {

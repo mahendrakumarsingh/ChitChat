@@ -207,9 +207,13 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
         });
     }, [createPeerConnection, currentUserId]);
 
-    const handleCallRejected = useCallback(() => {
-        console.log('[WebRTC] Call rejected');
-        alert('Call was rejected');
+    const handleCallRejected = useCallback((data) => {
+        console.log('[WebRTC] Call rejected', data?.reason ? `(Reason: ${data.reason})` : '');
+        if (data?.reason === 'offline') {
+            alert('The user is currently offline or unreachable.');
+        } else {
+            alert('Call was rejected');
+        }
         cleanup();
     }, [cleanup]);
 
