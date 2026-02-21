@@ -34,6 +34,12 @@ export const useSocket = (userId, events) => {
         socket.emit('user:online', { userId });
       });
 
+      if (socket.connected) {
+        console.log('Socket already connected:', socket.id);
+        setIsConnected(true);
+        socket.emit('user:online', { userId });
+      }
+
       socket.on('disconnect', () => {
         console.log('Socket disconnected');
         setIsConnected(false);
