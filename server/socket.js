@@ -38,6 +38,13 @@ const init = (server) => {
 
             // Broadcast user online status
             socket.broadcast.emit('user:online', { userId: strId });
+
+            // Send existing online users to the new user
+            for (const [otherUserId, sockets] of userSockets) {
+                if (otherUserId !== strId && sockets.size > 0) {
+                    socket.emit('user:online', { userId: otherUserId });
+                }
+            }
         });
 
         // Typing events
