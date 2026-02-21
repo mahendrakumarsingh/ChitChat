@@ -93,6 +93,7 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
             setReceiverItem({ id: receiverId });
             setCallState('calling');
 
+            console.log('[WebRTC] Initiating call to:', receiverId);
             emit('call:initiate', {
                 callerId: currentUserId,
                 callerName: currentUserName,
@@ -187,6 +188,7 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
     // Socket Handlers
     const handleCallIncoming = useCallback(({ callerId, callerName, isVideo }) => {
         console.log('[WebRTC] Incoming call from', callerName);
+        alert(`Incoming call from ${callerName}`);
         setCaller({ id: callerId, name: callerName, isVideo });
         setIsVideoCall(isVideo);
         setCallState('incoming');

@@ -73,6 +73,8 @@ export const CallModal = ({
 
     if (callState === 'idle') return null;
 
+    console.log('Rendering CallModal with callState:', callState);
+
     const getDialingName = () => {
         if (callState === 'incoming') return caller?.name || 'Someone';
         if (callState === 'calling' || callState === 'connected') return caller?.name || receiverItem?.name || 'User';

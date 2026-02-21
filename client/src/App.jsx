@@ -16,6 +16,7 @@ function App() {
   const currentUserId = user?.id || user?._id || null;
   console.log('[App] Render. Auth:', isAuthenticated, 'User:', currentUserId);
   const [isConnected, setIsConnected] = useState(true);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   const webRTCHandlersRef = useRef({}); const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
@@ -25,7 +26,6 @@ function App() {
     messages,
     activeConversation,
     typingIndicators,
-    onlineUsers,
     selectConversation,
     sendMessage: sendMessageBase,
     receiveMessage,
@@ -63,9 +63,11 @@ function App() {
     },
     onUserOnline: (userId) => {
       console.log('User online:', userId);
+      setOnlineUsers(prev => [...new Set([...prev, userId])]);
     },
     onUserOffline: (userId) => {
       console.log('User offline:', userId);
+      setOnlineUsers(prev => prev.filter(id => id !== userId));
     },
     onCallIncoming: (data) => webRTCHandlersRef.current.onCallIncoming?.(data),
     onCallAccepted: (data) => webRTCHandlersRef.current.onCallAccepted?.(data),
@@ -171,6 +173,11 @@ function App() {
       otherUserId = p?._id || p?.id;
     }
 
+    if (!onlineUsers.includes(otherUserId)) {
+      alert('User is offline');
+      return;
+    }
+
     console.log('[App] Init Audio Call to:', otherUserId);
     if (otherUserId) {
       webRTC.initMediaAndCall(otherUserId, false);
@@ -186,6 +193,11 @@ function App() {
     if (!otherUserId) {
       const p = activeConvData.participants?.find(p => (p._id || p.id) !== currentUserId);
       otherUserId = p?._id || p?.id;
+    }
+
+    if (!onlineUsers.includes(otherUserId)) {
+      alert('User is offline');
+      return;
     }
 
     console.log('[App] Init Video Call to:', otherUserId);

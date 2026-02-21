@@ -8,7 +8,6 @@ export const useChat = (currentUser) => { // Expecting currentUser object or nul
   const [contacts, setContacts] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [typingIndicators, setTypingIndicators] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState([]);
 
   const token = localStorage.getItem('token');
 
@@ -245,8 +244,6 @@ export const useChat = (currentUser) => { // Expecting currentUser object or nul
   const removeTypingIndicator = () => setTypingIndicators([]);
   const markMessageAsRead = () => { };
   const addReaction = () => { };
-  const setUserOnline = (userId) => setOnlineUsers(prev => [...prev, userId]);
-  const setUserOffline = () => setOnlineUsers([]);
 
   return {
     conversations,
@@ -254,7 +251,6 @@ export const useChat = (currentUser) => { // Expecting currentUser object or nul
     contacts,
     activeConversation,
     typingIndicators,
-    onlineUsers,
     selectConversation,
     sendMessage,
     addContact,
@@ -265,7 +261,5 @@ export const useChat = (currentUser) => { // Expecting currentUser object or nul
     removeTypingIndicator,
     markMessageAsRead,
     addReaction,
-    setUserOnline,
-    setUserOffline,
   };
 };

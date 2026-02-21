@@ -66,6 +66,10 @@ const init = (server) => {
             console.log(`Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}`);
 
             const receiverSockets = getUserSockets(receiverId);
+            const availableUsers = Array.from(userSockets.keys());
+            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Available users: [${availableUsers.join(', ')}]\n`);
+            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Receiver ${receiverId} has ${receiverSockets.size} sockets\n`);
+
             if (receiverSockets.size === 0) {
                 // Emitting an automatic rejection if the user is literally offline
                 emitToUser(callerId, 'call:rejected', { receiverId, reason: 'offline' });
