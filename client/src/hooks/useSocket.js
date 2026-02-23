@@ -16,14 +16,14 @@ export const useSocket = (userId, events) => {
     if (!userId) return;
 
     try {
-      const socketUrl = import.meta.env.VITE_API_URL
-        ? import.meta.env.VITE_API_URL.replace('/api', '')
-        : 'http://localhost:4000';
+      const API_URL = import.meta.env.VITE_API_URL;
+      if (!API_URL) {
+        throw new Error("VITE_API_URL is not defined");
+      }
+      const socketUrl = API_URL.replace('/api', '');
       socketRef.current = io(socketUrl, {
-        autoConnect: true,
+        transports: ["websocket"],
         reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
       });
 
       const socket = socketRef.current;
