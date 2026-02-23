@@ -36,15 +36,8 @@ const init = (server) => {
             // Store userId on socket for disconnect handling
             socket.userId = strId;
 
-            // Broadcast user online status
-            socket.broadcast.emit('user:online', { userId: strId });
-
-            // Send existing online users to the new user
-            for (const [otherUserId, sockets] of userSockets) {
-                if (otherUserId !== strId && sockets.size > 0) {
-                    socket.emit('user:online', { userId: otherUserId });
-                }
-            }
+            // Broadcast user online status to all clients including self
+            io.emit('user:online', { userId: strId });
         });
 
         // Typing events
