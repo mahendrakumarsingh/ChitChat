@@ -70,6 +70,10 @@ export const useSocket = (userId, events) => {
         eventsRef.current.onUserOnline?.(data.userId);
       });
 
+      socket.on('users:online', (userIds) => {
+        eventsRef.current.onUsersOnline?.(userIds);
+      });
+
       socket.on('user:offline', (data) => {
         eventsRef.current.onUserOffline?.(data.userId);
       });

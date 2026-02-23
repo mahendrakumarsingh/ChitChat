@@ -65,6 +65,10 @@ function App() {
       console.log('User online:', userId);
       setOnlineUsers(prev => [...new Set([...prev, userId])]);
     },
+    onUsersOnline: (userIds) => {
+      console.log('Users online:', userIds);
+      setOnlineUsers(prev => [...new Set([...prev, ...userIds])]);
+    },
     onUserOffline: (userId) => {
       console.log('User offline:', userId);
       setOnlineUsers(prev => prev.filter(id => id !== userId));

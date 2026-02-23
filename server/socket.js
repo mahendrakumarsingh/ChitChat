@@ -38,6 +38,10 @@ const init = (server) => {
 
             // Broadcast user online status to all clients including self
             io.emit('user:online', { userId: strId });
+
+            // Send current online users list to the newly connected user
+            const onlineUsersList = Array.from(userSockets.keys());
+            socket.emit('users:online', onlineUsersList);
         });
 
         // Typing events
@@ -162,12 +166,12 @@ const emitToUser = (userId, event, data) => {
     fs.appendFileSync('server_debug.txt', debugMsg);
 
     console.log(`[emitToUser] Emitting ${event} to user ${userId} (${sockets.size} socket(s)). Available users: [${availableUsers}]`);
-    
+
     if (sockets.size === 0) {
         fs.appendFileSync('server_debug.txt', `[${timestamp}] WARNING: User ${userId} has no sockets!\n`);
         console.warn(`[emitToUser] WARNING: User ${userId} has no sockets!`);
     }
-    
+
     sockets.forEach(socketId => {
         console.log(`[emitToUser] Sending ${event} to socket ${socketId}`);
         io.to(socketId).emit(event, data);
