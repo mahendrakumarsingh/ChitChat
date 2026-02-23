@@ -143,7 +143,8 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
     };
 
     if (req.file) {
-      msgData.fileUrl = `http://localhost:4000/uploads/${req.file.filename}`;
+      const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 4000}`;
+      msgData.fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
       msgData.fileName = req.file.originalname;
       msgData.fileSize = req.file.size;
 

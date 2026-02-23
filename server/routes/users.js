@@ -41,8 +41,9 @@ router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
 
         if (name) updates.name = name;
         if (req.file) {
-            // Store relative path
-            updates.avatar = `http://localhost:4000/uploads/${req.file.filename}`;
+            // Store URL with base URL from environment
+            const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 4000}`;
+            updates.avatar = `${baseUrl}/uploads/${req.file.filename}`;
         }
 
         const user = await User.findByIdAndUpdate(

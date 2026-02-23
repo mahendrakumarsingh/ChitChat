@@ -3,8 +3,8 @@ const io = require('socket.io-client');
 const callerId = '66db69b7f1a3e8e7c10b0001';
 const receiverId = '66db69b7f1a3e8e7c10b0002';
 
-const caller = io('http://localhost:4000', { reconnection: false });
-const receiver = io('http://localhost:4000', { reconnection: false });
+const caller = io('https://chitchat-gomi.onrender.com', { reconnection: false });
+const receiver = io('https://chitchat-gomi.onrender.com', { reconnection: false });
 
 caller.on('connect', () => {
     console.log('Caller connected');
