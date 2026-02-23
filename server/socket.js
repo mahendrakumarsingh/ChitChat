@@ -61,21 +61,28 @@ const init = (server) => {
         // WebRTC & Call events
         socket.on('call:initiate', ({ callerId, receiverId, callerName, isVideo }) => {
             const fs = require('fs');
-            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}\n`);
-
-            console.log(`Call initiated by ${callerId} to ${receiverId}, video: ${isVideo}`);
+            const timestamp = new Date().toISOString();
+            const debugMsg = `[${timestamp}] ===== CALL:INITIATE ===== Caller: ${callerId}, Receiver: ${receiverId}, Video: ${isVideo}\n`;
+            fs.appendFileSync('server_debug.txt', debugMsg);
+            console.log(`===== CALL:INITIATE ===== Caller: ${callerId}, Receiver: ${receiverId}, Video: ${isVideo}`);
 
             const receiverSockets = getUserSockets(receiverId);
             const availableUsers = Array.from(userSockets.keys());
-            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Available users: [${availableUsers.join(', ')}]\n`);
-            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Receiver ${receiverId} has ${receiverSockets.size} sockets\n`);
+            fs.appendFileSync('server_debug.txt', `[${timestamp}] Available users: [${availableUsers.join(', ')}]\n`);
+            fs.appendFileSync('server_debug.txt', `[${timestamp}] Receiver ${receiverId} has ${receiverSockets.size} socket(s)\n`);
+            console.log(`Available users: [${availableUsers.join(', ')}]`);
+            console.log(`Receiver ${receiverId} has ${receiverSockets.size} socket(s)`);
 
             if (receiverSockets.size === 0) {
                 // Emitting an automatic rejection if the user is literally offline
+                fs.appendFileSync('server_debug.txt', `[${timestamp}] Receiver is offline - sending rejection\n`);
+                console.log('Receiver is offline - sending rejection');
                 emitToUser(callerId, 'call:rejected', { receiverId, reason: 'offline' });
                 return;
             }
 
+            fs.appendFileSync('server_debug.txt', `[${timestamp}] Emitting call:incoming to receiver ${receiverId}\n`);
+            console.log(`Emitting call:incoming to receiver ${receiverId}`);
             emitToUser(receiverId, 'call:incoming', {
                 callerId,
                 callerName,
@@ -86,11 +93,17 @@ const init = (server) => {
 
         socket.on('call:accept', ({ callerId, receiverId }) => {
             const fs = require('fs');
-            fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Call accepted by ${receiverId} for ${callerId}\n`);
+            const timestamp = new Date().toISOString();
+            fs.appendFileSync('server_debug.txt', `[${timestamp}] ===== CALL:ACCEPT ===== Receiver: ${receiverId}, Caller: ${callerId}\n`);
+            console.log(`===== CALL:ACCEPT ===== Receiver: ${receiverId}, Caller: ${callerId}`);
             emitToUser(callerId, 'call:accepted', { receiverId });
         });
 
         socket.on('call:reject', ({ callerId, receiverId }) => {
+            const fs = require('fs');
+            const timestamp = new Date().toISOString();
+            fs.appendFileSync('server_debug.txt', `[${timestamp}] ===== CALL:REJECT ===== Receiver: ${receiverId}, Caller: ${callerId}\n`);
+            console.log(`===== CALL:REJECT ===== Receiver: ${receiverId}, Caller: ${callerId}`);
             emitToUser(callerId, 'call:rejected', { receiverId });
         });
 
@@ -144,10 +157,19 @@ const emitToUser = (userId, event, data) => {
     const sockets = getUserSockets(userId);
     const fs = require('fs');
     const availableUsers = Array.from(userSockets.keys()).join(', ');
-    fs.appendFileSync('server_debug.txt', `[${new Date().toISOString()}] Emitting ${event} to user ${userId} (Sockets: ${sockets.size}). Available user keys: [${availableUsers}]\n`);
+    const timestamp = new Date().toISOString();
+    const debugMsg = `[${timestamp}] emitToUser: event=${event}, userId=${userId}, socketCount=${sockets.size}, availableKeys=[${availableUsers}]\n`;
+    fs.appendFileSync('server_debug.txt', debugMsg);
 
-    console.log(`[Socket] Emitting ${event} to user ${userId} (Sockets: ${sockets.size})`);
+    console.log(`[emitToUser] Emitting ${event} to user ${userId} (${sockets.size} socket(s)). Available users: [${availableUsers}]`);
+    
+    if (sockets.size === 0) {
+        fs.appendFileSync('server_debug.txt', `[${timestamp}] WARNING: User ${userId} has no sockets!\n`);
+        console.warn(`[emitToUser] WARNING: User ${userId} has no sockets!`);
+    }
+    
     sockets.forEach(socketId => {
+        console.log(`[emitToUser] Sending ${event} to socket ${socketId}`);
         io.to(socketId).emit(event, data);
     });
 };

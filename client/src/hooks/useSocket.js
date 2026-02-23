@@ -86,24 +86,31 @@ export const useSocket = (userId, events) => {
 
       // WebRTC & Call Events
       socket.on('call:incoming', (data) => {
+        console.log('[useSocket] call:incoming received:', data);
         eventsRef.current.onCallIncoming?.(data);
       });
       socket.on('call:accepted', (data) => {
+        console.log('[useSocket] call:accepted received');
         eventsRef.current.onCallAccepted?.(data);
       });
       socket.on('call:rejected', (data) => {
+        console.log('[useSocket] call:rejected received');
         eventsRef.current.onCallRejected?.(data);
       });
       socket.on('call:ended', (data) => {
+        console.log('[useSocket] call:ended received');
         eventsRef.current.onCallEnded?.(data);
       });
       socket.on('webrtc:offer', (data) => {
+        console.log('[useSocket] webrtc:offer received');
         eventsRef.current.onWebRTCOffer?.(data);
       });
       socket.on('webrtc:answer', (data) => {
+        console.log('[useSocket] webrtc:answer received');
         eventsRef.current.onWebRTCAnswer?.(data);
       });
       socket.on('webrtc:ice-candidate', (data) => {
+        console.log('[useSocket] webrtc:ice-candidate received');
         eventsRef.current.onWebRTCIceCandidate?.(data);
       });
 

@@ -83,6 +83,7 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
 
     const initMediaAndCall = async (receiverId, isVideo) => {
         try {
+            console.log('[WebRTC] initMediaAndCall called with receiverId:', receiverId, 'isVideo:', isVideo);
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: isVideo ? { facingMode: 'user' } : false,
                 audio: true,
@@ -187,6 +188,7 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
 
     // Socket Handlers
     const handleCallIncoming = useCallback(({ callerId, callerName, isVideo }) => {
+        console.log('[WebRTC] handleCallIncoming triggered', { callerId, callerName, isVideo });
         console.log('[WebRTC] Incoming call from', callerName);
         alert(`Incoming call from ${callerName}`);
         setCaller({ id: callerId, name: callerName, isVideo });
