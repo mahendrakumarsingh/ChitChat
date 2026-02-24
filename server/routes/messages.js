@@ -139,7 +139,8 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
       senderName: req.user.username,
       content: content || '',
       roomId: conversationId,
-      type: type || 'text'
+      type: type || 'text',
+      callDuration: req.body.callDuration
     };
 
     if (req.file) {

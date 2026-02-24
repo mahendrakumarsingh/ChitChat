@@ -9,6 +9,7 @@ export const CallModal = ({
     isVideoCall,
     localStream,
     remoteStream,
+    callDuration,
     onAccept,
     onReject,
     onEnd,
@@ -81,17 +82,24 @@ export const CallModal = ({
         return '';
     };
 
+    const formatDuration = (seconds) => {
+        if (!seconds) return '00:00';
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
             <div className={`relative bg-[var(--surface)] border border-[var(--surface-light)] overflow-hidden shadow-2xl transition-all duration-300 ${(callState === 'connected' || callState === 'calling') && isVideoCall ? (isFullscreen ? 'w-screen h-screen border-none rounded-none' : 'w-[90vw] h-[90vh] md:w-[80vw] md:h-[80vh] rounded-2xl') : 'w-[90vw] max-w-sm rounded-2xl'}`}>
 
                 {/* Header - Call Status */}
-                <div className="absolute top-4 left-0 right-0 z-10 flex flex-col items-center justify-center p-4">
+                <div className="absolute top-4 left-0 right-0 z-10 flex flex-col items-center justify-center p-4 transition-all duration-300">
                     <h2 className="text-xl font-bold text-white drop-shadow-md">{getDialingName()}</h2>
-                    <p className="text-sm text-white/80 drop-shadow-md">
+                    <p className="text-sm text-white/80 drop-shadow-md mt-1 font-medium bg-black/20 px-3 py-1 rounded-full backdrop-blur-sm">
                         {callState === 'incoming' ? (isVideoCall ? 'Incoming Video Call...' : 'Incoming Audio Call...') :
                             callState === 'calling' ? 'Calling...' :
-                                callState === 'connected' ? (isVideoCall ? 'Video Call' : 'Audio Call Connected') : ''}
+                                callState === 'connected' ? formatDuration(callDuration) : ''}
                     </p>
                 </div>
 
@@ -132,6 +140,16 @@ export const CallModal = ({
                             autoPlay
                             playsInline
                             className="w-full h-full object-cover"
+                        />
+                    )}
+
+                    {/* Remote Audio (for Audio-only calls) */}
+                    {!isVideoCall && callState === 'connected' && (
+                        <audio
+                            ref={remoteVideoRef}
+                            autoPlay
+                            playsInline
+                            className="hidden"
                         />
                     )}
 

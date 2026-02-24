@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 // Removed GSAP animation for debugging visibility
-import { Check, CheckCheck, FileText, Download, Play, Pause, MoreVertical, Trash2, Globe } from 'lucide-react';
+import { Check, CheckCheck, FileText, Download, Play, Pause, MoreVertical, Trash2, Globe, Phone, Video } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,6 +96,20 @@ export const MessageBubble = ({
             onMouseLeave={() => setShowReactions(false)}
           >
             {/* Content Based on Type */}
+            {message.type === 'call' && (
+              <div className={`flex items-center gap-3 p-3 rounded-lg ${isSelf ? 'bg-black/20' : 'bg-[var(--surface-light)]/50'} border border-[var(--surface-light)]`}>
+                <div className={`p-2 rounded-full ${message.content.includes('Missed') ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'}`}>
+                  {message.content.toLowerCase().includes('video') ? <Video className="w-5 h-5" /> : <Phone className="w-5 h-5" />}
+                </div>
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="text-sm font-medium">{message.content}</p>
+                  <p className="text-xs opacity-70 mt-0.5">
+                    {message.callDuration || 'No answer'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {message.type === 'text' && (
               <p className="text-[var(--text-primary)] text-sm leading-relaxed">
                 {message.content}

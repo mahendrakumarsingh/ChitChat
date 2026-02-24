@@ -7,7 +7,7 @@ const configuration = {
     ],
 };
 
-export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
+export const useWebRTC = (socketRef, currentUserId, currentUserName, onCallLog) => {
     const [callState, setCallState] = useState('idle'); // 'idle', 'calling', 'incoming', 'connected'
     const [caller, setCaller] = useState(null); // When incoming call: { id, name, isVideo }
     const [receiverItem, setReceiverItem] = useState(null); // When we initiate call: { id }
@@ -17,8 +17,35 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
 
+    const [callDuration, setCallDuration] = useState(0);
+    const callDurationRef = useRef(0);
+    const timerRef = useRef(null);
+
     const pcRef = useRef(null);
     const localStreamRef = useRef(null);
+
+    // Timer effect for connected state
+    useEffect(() => {
+        if (callState === 'connected') {
+            callDurationRef.current = 0;
+            setCallDuration(0);
+            timerRef.current = setInterval(() => {
+                callDurationRef.current += 1;
+                setCallDuration(callDurationRef.current);
+            }, 1000);
+        } else {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
+        }
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+    }, [callState]);
 
     const emit = (event, data) => {
         if (socketRef.current) {
@@ -36,6 +63,10 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
             localStreamRef.current.getTracks().forEach((track) => track.stop());
             localStreamRef.current = null;
         }
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
         setLocalStream(null);
         setRemoteStream(null);
         setCallState('idle');
@@ -43,6 +74,8 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
         setReceiverItem(null);
         setIsVideoCall(false);
         setFacingMode('user');
+        setCallDuration(0);
+        callDurationRef.current = 0;
     }, []);
 
     const createPeerConnection = useCallback((otherUserId) => {
@@ -81,7 +114,7 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
         return pc;
     }, [currentUserId, cleanup]);
 
-    const initMediaAndCall = async (receiverId, isVideo) => {
+    const initMediaAndCall = async (receiverId, isVideo, receiverName) => {
         try {
             console.log('[WebRTC] initMediaAndCall called with receiverId:', receiverId, 'isVideo:', isVideo);
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -91,7 +124,7 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
             localStreamRef.current = stream;
             setLocalStream(stream);
             setIsVideoCall(isVideo);
-            setReceiverItem({ id: receiverId });
+            setReceiverItem({ id: receiverId, name: receiverName });
             setCallState('calling');
 
             console.log('[WebRTC] Initiating call to:', receiverId);
@@ -149,6 +182,19 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
                 userId: currentUserId,
                 otherUserId,
             });
+            // If we are the caller and hanging up during calling/ringing, log Missed Call
+            // Or if connected, track it.
+            if (receiverItem) { // We are the caller
+                const isMissed = callState !== 'connected';
+                if (onCallLog) {
+                    onCallLog({
+                        receiverId: receiverItem.id,
+                        isVideo: isVideoCall,
+                        isMissed,
+                        duration: callDurationRef.current
+                    });
+                }
+            }
         }
         cleanup();
     };
@@ -190,7 +236,6 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
     const handleCallIncoming = useCallback(({ callerId, callerName, isVideo }) => {
         console.log('[WebRTC] handleCallIncoming triggered', { callerId, callerName, isVideo });
         console.log('[WebRTC] Incoming call from', callerName);
-        alert(`Incoming call from ${callerName}`);
         setCaller({ id: callerId, name: callerName, isVideo });
         setIsVideoCall(isVideo);
         setCallState('incoming');
@@ -214,17 +259,36 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
     const handleCallRejected = useCallback((data) => {
         console.log('[WebRTC] Call rejected', data?.reason ? `(Reason: ${data.reason})` : '');
         if (data?.reason === 'offline') {
-            alert('The user is currently offline or unreachable.');
+            // Optional: you can show a toast instead of an alert
+            // alert('The user is currently offline or unreachable.');
         } else {
-            alert('Call was rejected');
+            // Optional: show a toast
+            // alert('Call was rejected');
+        }
+        // Log missed call
+        if (receiverItem && onCallLog) {
+            onCallLog({
+                receiverId: receiverItem.id,
+                isVideo: isVideoCall,
+                isMissed: true,
+                duration: 0
+            });
         }
         cleanup();
-    }, [cleanup]);
+    }, [cleanup, receiverItem, isVideoCall, onCallLog]);
 
     const handleCallEnded = useCallback(() => {
         console.log('[WebRTC] Call ended by other user');
+        if (receiverItem && onCallLog) {
+            onCallLog({
+                receiverId: receiverItem.id,
+                isVideo: isVideoCall,
+                isMissed: callState !== 'connected',
+                duration: callDurationRef.current
+            });
+        }
         cleanup();
-    }, [cleanup]);
+    }, [cleanup, receiverItem, isVideoCall, callState, onCallLog]);
 
     const handleWebRTCOffer = useCallback(async ({ offer, callerId }) => {
         if (!pcRef.current) {
@@ -280,6 +344,7 @@ export const useWebRTC = (socketRef, currentUserId, currentUserName) => {
         isVideoCall,
         localStream,
         remoteStream,
+        callDuration,
         initMediaAndCall,
         answerCall,
         rejectCall,

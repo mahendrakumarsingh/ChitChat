@@ -82,7 +82,28 @@ function App() {
     onWebRTCIceCandidate: (data) => webRTCHandlersRef.current.onWebRTCIceCandidate?.(data),
   });
 
-  const webRTC = useWebRTC(socketRef, currentUserId, user?.name || user?.username);
+  const formatDurationStr = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const handleCallLog = useCallback(({ receiverId, isVideo, isMissed, duration }) => {
+    const conversation = conversations.find(c => {
+      return c.participants?.some(p => (p._id || p.id) === receiverId) && !c.isGroup;
+    });
+
+    if (conversation) {
+      const content = isMissed
+        ? (isVideo ? 'Missed video call' : 'Missed audio call')
+        : (isVideo ? 'Video call' : 'Audio call');
+      const formattedDuration = isMissed ? 'No answer' : formatDurationStr(duration);
+
+      sendMessageBase(conversation.id, content, 'call', null, formattedDuration);
+    }
+  }, [conversations, sendMessageBase]);
+
+  const webRTC = useWebRTC(socketRef, currentUserId, user?.name || user?.username, handleCallLog);
 
   useEffect(() => {
     webRTCHandlersRef.current = webRTC.socketHandlers;
@@ -184,7 +205,9 @@ function App() {
 
     console.log('[App] Init Audio Call to:', otherUserId);
     if (otherUserId) {
-      webRTC.initMediaAndCall(otherUserId, false);
+      const p = activeConvData.participants?.find(p => (p._id || p.id) === otherUserId);
+      const receiverName = p?.name || p?.username || 'User';
+      webRTC.initMediaAndCall(otherUserId, false, receiverName);
     } else {
       alert('Cannot determine the user to call.');
     }
@@ -206,7 +229,9 @@ function App() {
 
     console.log('[App] Init Video Call to:', otherUserId);
     if (otherUserId) {
-      webRTC.initMediaAndCall(otherUserId, true);
+      const p = activeConvData.participants?.find(p => (p._id || p.id) === otherUserId);
+      const receiverName = p?.name || p?.username || 'User';
+      webRTC.initMediaAndCall(otherUserId, true, receiverName);
     } else {
       alert('Cannot determine the user to call.');
     }
@@ -275,6 +300,7 @@ function App() {
         isVideoCall={webRTC.isVideoCall}
         localStream={webRTC.localStream}
         remoteStream={webRTC.remoteStream}
+        callDuration={webRTC.callDuration}
         onAccept={webRTC.answerCall}
         onReject={webRTC.rejectCall}
         onEnd={webRTC.endCall}

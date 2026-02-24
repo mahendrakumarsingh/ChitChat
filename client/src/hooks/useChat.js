@@ -88,7 +88,7 @@ export const useChat = (currentUser) => { // Expecting currentUser object or nul
     fetchMessages(conversationId);
   }, [fetchMessages]);
 
-  const sendMessage = useCallback(async (conversationId, content, type = 'text', file = null) => {
+  const sendMessage = useCallback(async (conversationId, content, type = 'text', file = null, callDuration = null) => {
     if (!token) return;
     try {
       let body;
@@ -101,12 +101,13 @@ export const useChat = (currentUser) => { // Expecting currentUser object or nul
         formData.append('conversationId', conversationId);
         formData.append('type', type);
         if (content) formData.append('content', content);
+        if (callDuration) formData.append('callDuration', callDuration);
         formData.append('file', file);
         body = formData;
         // Don't set Content-Type for FormData
       } else {
         headers['Content-Type'] = 'application/json';
-        body = JSON.stringify({ content, conversationId, type });
+        body = JSON.stringify({ content, conversationId, type, callDuration });
       }
 
       const res = await fetch(`${API_URL}/messages`, {
